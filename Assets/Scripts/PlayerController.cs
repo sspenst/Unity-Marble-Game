@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
     private int count;
     private int total;
     private bool isGameActive = true;
+    private bool isJumping = false;
+    // starts in the air
+    private bool inAir = true;
 
     private GameObject mainCamera;
 
@@ -51,16 +54,18 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(mainCameraRotation * moveForce);
     }
 
-    private void LateUpdate()
+    private void Update()
     {
         // TODO: "Mouse Y" Input Axis?
         // use m_Look.y?
         // rotate around z axis relative to the camera
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!inAir && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(Vector3.up * jumpForce);
         }
+
+        isJumping = Input.GetKey(KeyCode.Space);
     }
 
     void OnMove(InputValue movementValue)
@@ -84,6 +89,21 @@ public class PlayerController : MonoBehaviour
             count += 1;
             SetCountText();
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        inAir = false;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        inAir = false;
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        inAir = true;
     }
 
     void SetCountText()
