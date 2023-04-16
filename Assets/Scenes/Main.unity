@@ -1209,7 +1209,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 365534b793bbc4e47a7d1fc599f3a7a1, type: 2}
+  - {fileID: 2100000, guid: 875032707a62f3946aa09f4b0019fedf, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1286,7 +1286,7 @@ MonoBehaviour:
   winTextObject: {fileID: 967278661}
   playerCamera: {fileID: 963194225}
   speed: 8
-  jumpForce: 200
+  jumpVelocity: 0
 --- !u!114 &1516307640
 MonoBehaviour:
   m_ObjectHideFlags: 0

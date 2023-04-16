@@ -19,22 +19,29 @@ public class PlayerController : MonoBehaviour
     private float speed;
 
     [SerializeField]
-    private float jumpForce;
+    private float jumpVelocity;
+
+    [SerializeField]
+    private float torque;
+
+    [SerializeField]
+    private float torqueAir;
 
     private int count;
     private int total;
     private bool isGameActive = true;
-    private bool isJumping = false;
-    // starts in the air
-    private bool inAir = true;
+    private bool isJumpPressed = false;
+    private bool isColliding = false;
 
     private GameObject mainCamera;
 
     // Start is called before the first frame update
     void Start()
     {
-        speed = 5.0f;
-        jumpForce = 200.0f;
+        speed = 3.0f;
+        jumpVelocity = 4.0f;
+        torque = 0.8f;
+        torqueAir = 0.4f;
 
         rb = GetComponent<Rigidbody>();
 
@@ -52,6 +59,26 @@ public class PlayerController : MonoBehaviour
     }
 
     private void FixedUpdate()
+    {
+        //UpdateMoveForce();
+        //UpdateAngularVelocity();
+        UpdateTorque();
+
+        if (isJumpPressed && isColliding)
+        {
+            // BUG?:
+            // with high torque (and high height?), the marble doesn't catch any friction from the ground
+            // this might just be expected but it feels weird in some situations (eg after a wall hit)
+
+            // TODO: velocity after jumping should be perpendicular to collision surface
+            rb.velocity = new Vector3(rb.velocity.x, jumpVelocity, rb.velocity.z);
+        }
+    }
+
+    /*
+     * Updates the force of the marble based on camera rotation and move input
+     */
+    void UpdateMoveForce()
     {
         // adjust movement based on y rotation of main camera
         Quaternion mainCameraRotation = Quaternion.Euler(0, mainCamera.transform.localEulerAngles.y, 0);
@@ -81,6 +108,17 @@ public class PlayerController : MonoBehaviour
 
         rb.angularVelocity = adjustedAngularVelocity;
     }
+    void UpdateTorque()
+    {
+        // adjust movement based on y rotation of main camera
+        // NB: need to rotate by an additional 90 because we are adjusting torque
+        Quaternion mainCameraRotation = Quaternion.Euler(0, mainCamera.transform.localEulerAngles.y + 90, 0);
+        Vector3 moveForce = new Vector3(m_Move.x, 0.0f, m_Move.y) * (isColliding ? torque : torqueAir);
+
+        Vector3 rotatedMoveForce = mainCameraRotation * moveForce;
+
+        rb.AddTorque(rotatedMoveForce);
+    }
 
     private void Update()
     {
@@ -88,12 +126,7 @@ public class PlayerController : MonoBehaviour
         // use m_Look.y?
         // rotate around z axis relative to the camera
 
-        if (!inAir && Input.GetKeyDown(KeyCode.Space))
-        {
-            rb.AddForce(Vector3.up * jumpForce);
-        }
-
-        isJumping = Input.GetKey(KeyCode.Space);
+        isJumpPressed = Input.GetKey(KeyCode.Space);
     }
 
     void OnMove(InputValue movementValue)
@@ -121,17 +154,17 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        inAir = false;
+        isColliding = true;
     }
 
     private void OnCollisionStay(Collision collision)
     {
-        inAir = false;
+        isColliding = true;
     }
 
     private void OnCollisionExit(Collision collision)
     {
-        inAir = true;
+        isColliding = false;
     }
 
     void SetCountText()
