@@ -37,6 +37,12 @@ public class PlayerController : MonoBehaviour
         jumpForce = 200.0f;
 
         rb = GetComponent<Rigidbody>();
+
+        rb.maxAngularVelocity = float.PositiveInfinity;
+
+        // TODO: change this?
+        //rb.maxDepenetrationVelocity
+
         total = GameObject.FindGameObjectsWithTag("PickUp").Length;
         SetCountText();
 
@@ -50,8 +56,30 @@ public class PlayerController : MonoBehaviour
         // adjust movement based on y rotation of main camera
         Quaternion mainCameraRotation = Quaternion.Euler(0, mainCamera.transform.localEulerAngles.y, 0);
         Vector3 moveForce = new Vector3(speed * m_Move.x, 0.0f, speed * m_Move.y);
+        Vector3 rotatedMoveForce = mainCameraRotation * moveForce;
 
-        rb.AddForce(mainCameraRotation * moveForce);
+        rb.AddForce(rotatedMoveForce);
+    }
+
+    /*
+     * Updates angular velocity instead of adding force
+     * This results in 0 air movement but very fast spinning in the air
+     * (maybe you can give the air friction to make this more playable?)
+     */
+    void UpdateAngularVelocity()
+    {
+        // adjust movement based on y rotation of main camera
+        // NB: need to rotate by an additional 90 because we are adjusting angular velocity
+        Quaternion mainCameraRotation = Quaternion.Euler(0, mainCamera.transform.localEulerAngles.y + 90, 0);
+        Vector3 moveForce = new Vector3(speed * m_Move.x, 0.0f, speed * m_Move.y);
+
+        Vector3 rotatedMoveForce = mainCameraRotation * moveForce;
+
+        Vector3 flattenedAngularVelocity = new Vector3(rb.angularVelocity.x, 0.0f, rb.angularVelocity.z);
+
+        Vector3 adjustedAngularVelocity = new Vector3(flattenedAngularVelocity.x + rotatedMoveForce.x, 0.0f, flattenedAngularVelocity.z + rotatedMoveForce.z);
+
+        rb.angularVelocity = adjustedAngularVelocity;
     }
 
     private void Update()
