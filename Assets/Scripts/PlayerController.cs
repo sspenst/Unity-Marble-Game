@@ -60,9 +60,13 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        //UpdateMoveForce();
         //UpdateAngularVelocity();
         UpdateTorque();
+
+        //if (!isColliding)
+        //{
+            UpdateMoveForce();
+        //}
 
         if (isJumpPressed && isColliding)
         {
