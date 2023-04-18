@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
     public GameObject playerCamera;
+    public AudioSource jumpSound;
 
     private Rigidbody rb;
     private Vector2 m_Look;
@@ -45,6 +46,8 @@ public class PlayerController : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
 
+        jumpSound = GetComponent<AudioSource>();
+
         rb.maxAngularVelocity = float.PositiveInfinity;
 
         // TODO: change this?
@@ -76,6 +79,7 @@ public class PlayerController : MonoBehaviour
 
             // TODO: velocity after jumping should be perpendicular to collision surface
             rb.velocity = new Vector3(rb.velocity.x, jumpVelocity, rb.velocity.z);
+            jumpSound.Play();
         }
     }
 
